@@ -60,6 +60,14 @@ func (d *DB) Permissions() *repository.PermissionRepository {
 	return repository.NewPermissionRepository(d.Pool)
 }
 
+// Connectors returns a repository for connector configuration.
+func (d *DB) Connectors() *repository.ConnectorRepository {
+	if d == nil {
+		return repository.NewConnectorRepository(nil)
+	}
+	return repository.NewConnectorRepository(d.Pool)
+}
+
 // Close releases the connection pool.
 func (d *DB) Close() {
 	if d != nil && d.Pool != nil {
