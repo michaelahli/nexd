@@ -1,0 +1,95 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/michael/nextd
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+server:
+  host: 0.0.0.0
+  port: 8080
+
+postgresql:
+  host: ""
+  port: 5432
+  database: nextd
+  user: nextd
+  password: ""
+  sslMode: disable
+  existingSecret: ""
+  passwordKey: password
+
+jwt:
+  secret: ""
+  existingSecret: ""
+  secretKey: jwt-secret
+
+ai:
+  provider: openai
+  host: https://api.openai.com/v1
+  apiKey: ""
+  existingSecret: ""
+  apiKeyKey: api-key
+  embeddingModel: text-embedding-ada-002
+  chatModel: gpt-4
+
+rateLimit:
+  requests: 100
+  window: 1m
+
+indexing:
+  workers: 5
+  batchSize: 10
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: nextd.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []

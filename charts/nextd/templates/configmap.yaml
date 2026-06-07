@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "nextd.fullname" . }}-config
+  labels:
+    {{- include "nextd.labels" . | nindent 4 }}
+data:
+  SERVER_HOST: {{ .Values.server.host | quote }}
+  SERVER_PORT: {{ .Values.server.port | quote }}
+  DB_HOST: {{ .Values.postgresql.host | quote }}
+  DB_PORT: {{ .Values.postgresql.port | quote }}
+  DB_USER: {{ .Values.postgresql.user | quote }}
+  DB_NAME: {{ .Values.postgresql.database | quote }}
+  DB_SSLMODE: {{ .Values.postgresql.sslMode | quote }}
+  AI_PROVIDER: {{ .Values.ai.provider | quote }}
+  AI_HOST: {{ .Values.ai.host | quote }}
+  AI_EMBEDDING_MODEL: {{ .Values.ai.embeddingModel | quote }}
+  AI_CHAT_MODEL: {{ .Values.ai.chatModel | quote }}
+  RATE_LIMIT_REQUESTS: {{ .Values.rateLimit.requests | quote }}
+  RATE_LIMIT_WINDOW: {{ .Values.rateLimit.window | quote }}
+  INDEXING_WORKERS: {{ .Values.indexing.workers | quote }}
+  INDEXING_BATCH_SIZE: {{ .Values.indexing.batchSize | quote }}
