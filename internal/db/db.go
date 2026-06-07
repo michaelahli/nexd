@@ -68,6 +68,22 @@ func (d *DB) Connectors() *repository.ConnectorRepository {
 	return repository.NewConnectorRepository(d.Pool)
 }
 
+// Documents returns a repository for indexed documents and embeddings.
+func (d *DB) Documents() *repository.DocumentRepository {
+	if d == nil {
+		return repository.NewDocumentRepository(nil)
+	}
+	return repository.NewDocumentRepository(d.Pool)
+}
+
+// SyncJobs returns a repository for indexing jobs.
+func (d *DB) SyncJobs() *repository.SyncJobRepository {
+	if d == nil {
+		return repository.NewSyncJobRepository(nil)
+	}
+	return repository.NewSyncJobRepository(d.Pool)
+}
+
 // Close releases the connection pool.
 func (d *DB) Close() {
 	if d != nil && d.Pool != nil {
