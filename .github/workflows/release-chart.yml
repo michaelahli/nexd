@@ -93,6 +93,165 @@ jobs:
           test -f "${HELM_REPO_DIR}/index.yaml"
           ls -la "${HELM_REPO_DIR}"
 
+      - name: Build GitHub Pages documentation
+        shell: bash
+        run: |
+          cat > "${HELM_REPO_DIR}/index.html" <<'HTML'
+          <!doctype html>
+          <html lang="en">
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <title>NEXTD Helm Chart</title>
+              <style>
+                :root {
+                  color-scheme: light dark;
+                  --bg: #f7f7f4;
+                  --fg: #1e2428;
+                  --muted: #66717a;
+                  --line: #d9dedb;
+                  --panel: #ffffff;
+                  --accent: #256f74;
+                  --code: #101820;
+                  --code-fg: #eef6f4;
+                }
+
+                @media (prefers-color-scheme: dark) {
+                  :root {
+                    --bg: #111416;
+                    --fg: #eef2f0;
+                    --muted: #a9b2b8;
+                    --line: #2d3539;
+                    --panel: #181d20;
+                    --accent: #6fc5bd;
+                    --code: #0b0f12;
+                    --code-fg: #eef6f4;
+                  }
+                }
+
+                * { box-sizing: border-box; }
+                body {
+                  margin: 0;
+                  background: var(--bg);
+                  color: var(--fg);
+                  font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                }
+                main {
+                  width: min(920px, calc(100% - 32px));
+                  margin: 0 auto;
+                  padding: 56px 0;
+                }
+                header { margin-bottom: 40px; }
+                h1 {
+                  margin: 0 0 12px;
+                  font-size: clamp(2.2rem, 5vw, 4rem);
+                  line-height: 1;
+                  letter-spacing: 0;
+                }
+                h2 {
+                  margin: 34px 0 12px;
+                  font-size: 1.25rem;
+                  letter-spacing: 0;
+                }
+                p { margin: 0 0 16px; color: var(--muted); }
+                a { color: var(--accent); }
+                .panel {
+                  background: var(--panel);
+                  border: 1px solid var(--line);
+                  border-radius: 8px;
+                  padding: 20px;
+                  margin: 16px 0;
+                }
+                pre {
+                  margin: 12px 0 0;
+                  overflow-x: auto;
+                  background: var(--code);
+                  color: var(--code-fg);
+                  border-radius: 8px;
+                  padding: 16px;
+                }
+                code {
+                  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+                  font-size: 0.92rem;
+                }
+                dl {
+                  display: grid;
+                  grid-template-columns: minmax(130px, 180px) 1fr;
+                  gap: 10px 18px;
+                  margin: 0;
+                }
+                dt { color: var(--muted); }
+                dd { margin: 0; }
+                footer {
+                  margin-top: 44px;
+                  padding-top: 18px;
+                  border-top: 1px solid var(--line);
+                  color: var(--muted);
+                  font-size: 0.92rem;
+                }
+              </style>
+            </head>
+            <body>
+              <main>
+                <header>
+                  <h1>NEXTD Helm Chart</h1>
+                  <p>Install the NEXTD Enterprise Knowledge Intelligence Platform chart from GitHub Pages or GHCR OCI.</p>
+                </header>
+
+                <section class="panel">
+                  <h2>Classic Helm Repository</h2>
+                  <p>This GitHub Pages site also serves the Helm repository index at <a href="./index.yaml">index.yaml</a>.</p>
+                  <pre><code>helm repo add nextd __PAGES_URL__
+          helm repo update
+          helm install nextd nextd/__CHART_NAME__ --version __CHART_VERSION__</code></pre>
+                </section>
+
+                <section class="panel">
+                  <h2>OCI Registry</h2>
+                  <p>The same chart is published to GitHub Container Registry as an OCI artifact.</p>
+                  <pre><code>helm install nextd __CHART_REF__ --version __CHART_VERSION__</code></pre>
+                </section>
+
+                <section class="panel">
+                  <h2>Chart Details</h2>
+                  <dl>
+                    <dt>Chart</dt>
+                    <dd><code>__CHART_NAME__</code></dd>
+                    <dt>Version</dt>
+                    <dd><code>__CHART_VERSION__</code></dd>
+                    <dt>Repository</dt>
+                    <dd><a href="__PAGES_URL__"><code>__PAGES_URL__</code></a></dd>
+                    <dt>Chart Archive</dt>
+                    <dd><a href="./__CHART_ARCHIVE__"><code>__CHART_ARCHIVE__</code></a></dd>
+                  </dl>
+                </section>
+
+                <section class="panel">
+                  <h2>Common Values</h2>
+                  <pre><code>helm install nextd nextd/__CHART_NAME__ \
+            --version __CHART_VERSION__ \
+            --set postgresql.host=postgres.example.internal \
+            --set postgresql.password='change-me' \
+            --set jwt.secret='change-me' \
+            --set ai.apiKey='change-me'</code></pre>
+                </section>
+
+                <footer>
+                  Generated by the NEXTD Helm chart release workflow.
+                </footer>
+              </main>
+            </body>
+          </html>
+          HTML
+
+          sed -i \
+            -e 's|__PAGES_URL__|${{ steps.chart_meta.outputs.pages_url }}|g' \
+            -e 's|__CHART_NAME__|${{ steps.chart_meta.outputs.chart_name }}|g' \
+            -e 's|__CHART_VERSION__|${{ steps.chart_meta.outputs.chart_version }}|g' \
+            -e 's|__CHART_ARCHIVE__|${{ steps.chart_meta.outputs.chart_archive }}|g' \
+            -e 's|__CHART_REF__|${{ steps.chart_meta.outputs.chart_ref }}|g' \
+            "${HELM_REPO_DIR}/index.html"
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
@@ -120,6 +279,9 @@ jobs:
             ${{ env.CHART_DIST }}/checksums.txt
           body: |
             Helm chart published to GitHub Pages and GHCR OCI.
+
+            Documentation:
+            `${{ steps.chart_meta.outputs.pages_url }}`
 
             Classic Helm repo install:
             `helm repo add nextd ${{ steps.chart_meta.outputs.pages_url }} && helm repo update && helm install nextd nextd/${{ steps.chart_meta.outputs.chart_name }} --version ${{ steps.chart_meta.outputs.chart_version }}`
