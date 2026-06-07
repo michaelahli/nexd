@@ -11,7 +11,7 @@ import (
 )
 
 func TestHealthEndpoint(t *testing.T) {
-	router := apphttp.NewRouter(testConfig())
+	router := apphttp.NewRouter(testConfig(), apphttp.Options{})
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/health", nil)
 
@@ -29,7 +29,7 @@ func TestHealthEndpoint(t *testing.T) {
 }
 
 func TestCORSPreflight(t *testing.T) {
-	router := apphttp.NewRouter(testConfig())
+	router := apphttp.NewRouter(testConfig(), apphttp.Options{})
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodOptions, "/health", nil)
 
@@ -46,7 +46,7 @@ func TestCORSPreflight(t *testing.T) {
 func TestRateLimiter(t *testing.T) {
 	cfg := testConfig()
 	cfg.RateLimit.Requests = 1
-	router := apphttp.NewRouter(cfg)
+	router := apphttp.NewRouter(cfg, apphttp.Options{})
 
 	first := httptest.NewRecorder()
 	firstRequest := httptest.NewRequest(http.MethodGet, "/health", nil)

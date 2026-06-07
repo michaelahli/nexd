@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/michael/nextd/internal/auth"
 	"github.com/michael/nextd/internal/config"
 	"github.com/michael/nextd/internal/db"
 	apphttp "github.com/michael/nextd/internal/http"
@@ -31,10 +32,21 @@ func main() {
 }
 
 func runServer(cfg *config.Config) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	database, err := db.Connect(ctx, cfg.Database)
+	cancel()
+	if err != nil {
+		log.Fatalf("connect database: %v", err)
+	}
+	defer database.Close()
+
 	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 	server := &http.Server{
-		Addr:              addr,
-		Handler:           apphttp.NewRouter(cfg),
+		Addr: addr,
+		Handler: apphttp.NewRouter(cfg, apphttp.Options{
+			Users:  auth.NewUserStore(database.Pool),
+			Tokens: auth.NewTokenManager(cfg.JWT.Secret, cfg.JWT.Expiration),
+		}),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
@@ -56,10 +68,10 @@ func runServer(cfg *config.Config) {
 		log.Printf("Received %s, shutting down", sig)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownCancel()
 
-	if err := server.Shutdown(ctx); err != nil {
+	if err := server.Shutdown(shutdownCtx); err != nil {
 		log.Fatalf("shutdown http server: %v", err)
 	}
 
