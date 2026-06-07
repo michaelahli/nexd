@@ -7,6 +7,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/michaelahli/nexd/internal/config"
+	"github.com/michaelahli/nexd/internal/repository"
 )
 
 // DB wraps the PostgreSQL connection pool.
@@ -49,6 +50,14 @@ func (d *DB) Ping(ctx context.Context) error {
 		return fmt.Errorf("ping database: %w", err)
 	}
 	return nil
+}
+
+// Permissions returns a repository for document permission checks.
+func (d *DB) Permissions() *repository.PermissionRepository {
+	if d == nil {
+		return repository.NewPermissionRepository(nil)
+	}
+	return repository.NewPermissionRepository(d.Pool)
 }
 
 // Close releases the connection pool.
