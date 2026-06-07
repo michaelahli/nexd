@@ -8,6 +8,8 @@ on:
 permissions:
   contents: write
   packages: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: release-chart-${{ github.ref }}
@@ -16,12 +18,16 @@ concurrency:
 env:
   CHART_PATH: charts/nextd
   CHART_DIST: chart-packages
+  HELM_REPO_DIR: helm-repo
   REGISTRY: ghcr.io
 
 jobs:
   release-chart:
     name: Package And Publish Helm Chart
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy_pages.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,6 +46,7 @@ jobs:
           chart_version=$(awk '/^version:/ {print $2}' "${CHART_PATH}/Chart.yaml")
           chart_name=$(awk '/^name:/ {print $2}' "${CHART_PATH}/Chart.yaml")
           registry_namespace=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          pages_url="https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}"
           chart_ref="oci://${REGISTRY}/${registry_namespace}/charts/${chart_name}"
           push_ref="oci://${REGISTRY}/${registry_namespace}/charts"
 
@@ -48,6 +55,7 @@ jobs:
           echo "chart_archive=${chart_name}-${chart_version}.tgz" >> "$GITHUB_OUTPUT"
           echo "chart_ref=${chart_ref}" >> "$GITHUB_OUTPUT"
           echo "push_ref=${push_ref}" >> "$GITHUB_OUTPUT"
+          echo "pages_url=${pages_url}" >> "$GITHUB_OUTPUT"
 
       - name: Lint chart
         run: helm lint ${{ env.CHART_PATH }}
@@ -76,6 +84,27 @@ jobs:
       - name: Push chart to GHCR OCI registry
         run: helm push "${{ env.CHART_DIST }}/${{ steps.chart_meta.outputs.chart_archive }}" "${{ steps.chart_meta.outputs.push_ref }}"
 
+      - name: Build GitHub Pages Helm repository
+        shell: bash
+        run: |
+          mkdir -p "${HELM_REPO_DIR}"
+          cp "${CHART_DIST}/${{ steps.chart_meta.outputs.chart_archive }}" "${HELM_REPO_DIR}/"
+          helm repo index "${HELM_REPO_DIR}" --url "${{ steps.chart_meta.outputs.pages_url }}"
+          test -f "${HELM_REPO_DIR}/index.yaml"
+          ls -la "${HELM_REPO_DIR}"
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.HELM_REPO_DIR }}
+
+      - name: Deploy GitHub Pages Helm repository
+        id: deploy_pages
+        uses: actions/deploy-pages@v4
+
       - name: Generate checksums
         shell: bash
         run: |
@@ -90,7 +119,10 @@ jobs:
             ${{ env.CHART_DIST }}/*.tgz
             ${{ env.CHART_DIST }}/checksums.txt
           body: |
-            Helm chart published to GHCR OCI.
+            Helm chart published to GitHub Pages and GHCR OCI.
 
-            Install:
+            Classic Helm repo install:
+            `helm repo add nextd ${{ steps.chart_meta.outputs.pages_url }} && helm repo update && helm install nextd nextd/${{ steps.chart_meta.outputs.chart_name }} --version ${{ steps.chart_meta.outputs.chart_version }}`
+
+            OCI install:
             `helm install nextd ${{ steps.chart_meta.outputs.chart_ref }} --version ${{ steps.chart_meta.outputs.chart_version }}`
