@@ -1,0 +1,11 @@
+.git
+.github
+memories
+bin
+coverage.out
+*.test
+*.out
+.env
+.DS_Store
+Dockerfile
+docker-compose.yml

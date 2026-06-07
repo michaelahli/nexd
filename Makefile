@@ -21,10 +21,10 @@ clean: ## Clean build artifacts
 	rm -f coverage.out
 
 docker-up: ## Start Docker Compose
-	docker-compose up --build
+	docker compose up --build
 
 docker-down: ## Stop Docker Compose
-	docker-compose down
+	docker compose down
 
 migrate-up: ## Run database migrations up
 	migrate -path migrations -database "postgres://nextd:nextd@localhost:5432/nextd?sslmode=disable" up

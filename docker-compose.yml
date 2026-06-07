@@ -1,0 +1,44 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nextd:local
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: nextd
+      DB_PASSWORD: nextd
+      DB_NAME: nextd
+      DB_SSLMODE: disable
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/workspace:cached
+    restart: unless-stopped
+
+  postgres:
+    image: pgvector/pgvector:pg18
+    environment:
+      POSTGRES_USER: nextd
+      POSTGRES_PASSWORD: nextd
+      POSTGRES_DB: nextd
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nextd -d nextd"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
