@@ -11,10 +11,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/michael/nextd/internal/auth"
-	"github.com/michael/nextd/internal/config"
-	"github.com/michael/nextd/internal/db"
-	apphttp "github.com/michael/nextd/internal/http"
+	"github.com/michaelahli/nexd/internal/auth"
+	"github.com/michaelahli/nexd/internal/config"
+	"github.com/michaelahli/nexd/internal/db"
+	apphttp "github.com/michaelahli/nexd/internal/http"
 )
 
 func main() {
@@ -52,7 +52,7 @@ func runServer(cfg *config.Config) {
 
 	serverErr := make(chan error, 1)
 	go func() {
-		log.Printf("Starting NEXTD on %s", addr)
+		log.Printf("Starting NEXD on %s", addr)
 		serverErr <- server.ListenAndServe()
 	}()
 

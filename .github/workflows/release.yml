@@ -52,17 +52,17 @@ jobs:
           CGO_ENABLED: "0"
         run: |
           mkdir -p dist
-          name="nextd-${{ github.ref_name }}-${GOOS}-${GOARCH}"
+          name="nexd-${{ github.ref_name }}-${GOOS}-${GOARCH}"
           output="${name}"
           if [ "${GOOS}" = "windows" ]; then
             output="${name}.exe"
           fi
-          go build -trimpath -ldflags="-s -w" -o "dist/${output}" ./cmd/nextd
+          go build -trimpath -ldflags="-s -w" -o "dist/${output}" ./cmd/nexd
 
       - name: Package binary
         run: |
           cd dist
-          artifact="nextd-${{ github.ref_name }}-${{ matrix.goos }}-${{ matrix.goarch }}"
+          artifact="nexd-${{ github.ref_name }}-${{ matrix.goos }}-${{ matrix.goarch }}"
           if [ "${{ matrix.goos }}" = "windows" ]; then
             zip "${artifact}.zip" "${artifact}.exe"
             rm "${artifact}.exe"
@@ -74,7 +74,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: nextd-${{ github.ref_name }}-${{ matrix.goos }}-${{ matrix.goarch }}
+          name: nexd-${{ github.ref_name }}-${{ matrix.goos }}-${{ matrix.goarch }}
           path: dist/*
           if-no-files-found: error
 

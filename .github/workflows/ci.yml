@@ -47,7 +47,7 @@ jobs:
         run: go test -race -coverprofile=coverage.out ./...
 
       - name: Build binary
-        run: go build -trimpath -o bin/nextd ./cmd/nextd
+        run: go build -trimpath -o bin/nexd ./cmd/nexd
 
   docker:
     name: Docker Build and Push

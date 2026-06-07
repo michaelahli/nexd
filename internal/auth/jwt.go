@@ -11,7 +11,7 @@ import (
 
 var ErrInvalidToken = errors.New("invalid token")
 
-// Claims contains NEXTD JWT claims.
+// Claims contains NEXD JWT claims.
 type Claims struct {
 	UserID uuid.UUID `json:"user_id"`
 	Email  string    `json:"email"`

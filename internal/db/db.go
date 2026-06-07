@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/michael/nextd/internal/config"
+	"github.com/michaelahli/nexd/internal/config"
 )
 
 // DB wraps the PostgreSQL connection pool.

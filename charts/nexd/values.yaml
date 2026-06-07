@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/michael/nextd
+  repository: ghcr.io/michaelahli/nexd
   pullPolicy: IfNotPresent
   tag: ""
 
@@ -42,8 +42,8 @@ server:
 postgresql:
   host: ""
   port: 5432
-  database: nextd
-  user: nextd
+  database: nexd
+  user: nexd
   password: ""
   sslMode: disable
   existingSecret: ""
@@ -88,7 +88,7 @@ ingress:
   className: ""
   annotations: {}
   hosts:
-    - host: nextd.local
+    - host: nexd.local
       paths:
         - path: /
           pathType: Prefix

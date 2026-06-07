@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "nextd.fullname" . }}
+  name: {{ include "nexd.fullname" . }}
   labels:
-    {{- include "nextd.labels" . | nindent 4 }}
+    {{- include "nexd.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "nextd.selectorLabels" . | nindent 6 }}
+      {{- include "nexd.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "nextd.selectorLabels" . | nindent 8 }}
+        {{- include "nexd.selectorLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -21,7 +21,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-      serviceAccountName: {{ include "nextd.serviceAccountName" . }}
+      serviceAccountName: {{ include "nexd.serviceAccountName" . }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -29,7 +29,7 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: nextd
+        - name: nexd
           image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
@@ -40,22 +40,22 @@ spec:
               protocol: TCP
           envFrom:
             - configMapRef:
-                name: {{ include "nextd.fullname" . }}-config
+                name: {{ include "nexd.fullname" . }}-config
           env:
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ default (include "nextd.secretName" .) .Values.postgresql.existingSecret }}
+                  name: {{ default (include "nexd.secretName" .) .Values.postgresql.existingSecret }}
                   key: {{ .Values.postgresql.passwordKey }}
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: {{ default (include "nextd.secretName" .) .Values.jwt.existingSecret }}
+                  name: {{ default (include "nexd.secretName" .) .Values.jwt.existingSecret }}
                   key: {{ .Values.jwt.secretKey }}
             - name: AI_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ default (include "nextd.secretName" .) .Values.ai.existingSecret }}
+                  name: {{ default (include "nexd.secretName" .) .Values.ai.existingSecret }}
                   key: {{ .Values.ai.apiKeyKey }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

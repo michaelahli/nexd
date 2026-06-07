@@ -4,10 +4,10 @@ help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 build: ## Build the application
-	go build -o bin/nextd cmd/nextd/main.go
+	go build -o bin/nexd cmd/nexd/main.go
 
 run: ## Run the application
-	go run cmd/nextd/main.go
+	go run cmd/nexd/main.go
 
 test: ## Run tests
 	go test -v ./...
@@ -27,10 +27,10 @@ docker-down: ## Stop Docker Compose
 	docker compose down
 
 migrate-up: ## Run database migrations up
-	DB_HOST=localhost DB_PORT=5436 go run ./cmd/nextd migrate
+	DB_HOST=localhost DB_PORT=5436 go run ./cmd/nexd migrate
 
 migrate-down: ## Run database migrations down
-	migrate -path migrations -database "postgres://nextd:nextd@localhost:5436/nextd?sslmode=disable" down
+	migrate -path migrations -database "postgres://nexd:nexd@localhost:5436/nexd?sslmode=disable" down
 
 migrate-create: ## Create new migration (usage: make migrate-create name=create_users_table)
 	migrate create -ext sql -dir migrations -seq $(name)

@@ -1,8 +1,8 @@
-{{- define "nextd.name" -}}
+{{- define "nexd.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{- define "nextd.fullname" -}}
+{{- define "nexd.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -15,31 +15,31 @@
 {{- end }}
 {{- end }}
 
-{{- define "nextd.chart" -}}
+{{- define "nexd.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{- define "nextd.labels" -}}
-helm.sh/chart: {{ include "nextd.chart" . }}
-app.kubernetes.io/name: {{ include "nextd.name" . }}
+{{- define "nexd.labels" -}}
+helm.sh/chart: {{ include "nexd.chart" . }}
+app.kubernetes.io/name: {{ include "nexd.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
-{{- define "nextd.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "nextd.name" . }}
+{{- define "nexd.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "nexd.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{- define "nextd.serviceAccountName" -}}
+{{- define "nexd.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "nextd.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "nexd.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
-{{- define "nextd.secretName" -}}
-{{- printf "%s-secret" (include "nextd.fullname" .) }}
+{{- define "nexd.secretName" -}}
+{{- printf "%s-secret" (include "nexd.fullname" .) }}
 {{- end }}

@@ -5,10 +5,10 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/michael/nextd/internal/auth"
-	"github.com/michael/nextd/internal/config"
-	"github.com/michael/nextd/internal/http/handler"
-	"github.com/michael/nextd/internal/http/middleware"
+	"github.com/michaelahli/nexd/internal/auth"
+	"github.com/michaelahli/nexd/internal/config"
+	"github.com/michaelahli/nexd/internal/http/handler"
+	"github.com/michaelahli/nexd/internal/http/middleware"
 )
 
 // Options contains optional router dependencies.

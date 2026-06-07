@@ -1,4 +1,4 @@
-module github.com/michael/nextd
+module github.com/michaelahli/nexd
 
 go 1.25.7
 

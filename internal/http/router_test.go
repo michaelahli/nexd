@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/michael/nextd/internal/config"
-	apphttp "github.com/michael/nextd/internal/http"
+	"github.com/michaelahli/nexd/internal/config"
+	apphttp "github.com/michaelahli/nexd/internal/http"
 )
 
 func TestHealthEndpoint(t *testing.T) {

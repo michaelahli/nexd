@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/michael/nextd/internal/auth"
+	"github.com/michaelahli/nexd/internal/auth"
 )
 
 type userCreator interface {
