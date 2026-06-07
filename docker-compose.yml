@@ -14,13 +14,13 @@ services:
       SERVER_HOST: 0.0.0.0
       SERVER_PORT: 8080
     ports:
-      - "8080:8080"
+      - "8484:8080"
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
       - .:/workspace:cached
-    restart: unless-stopped
+    restart: "no"
 
   postgres:
     image: pgvector/pgvector:pg18
@@ -29,9 +29,9 @@ services:
       POSTGRES_PASSWORD: nextd
       POSTGRES_DB: nextd
     ports:
-      - "5432:5432"
+      - "5436:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U nextd -d nextd"]
       interval: 10s

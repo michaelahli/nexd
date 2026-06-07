@@ -21,16 +21,16 @@ clean: ## Clean build artifacts
 	rm -f coverage.out
 
 docker-up: ## Start Docker Compose
-	docker compose up --build
+	docker compose up --build --force-recreate -d
 
 docker-down: ## Stop Docker Compose
 	docker compose down
 
 migrate-up: ## Run database migrations up
-	migrate -path migrations -database "postgres://nextd:nextd@localhost:5432/nextd?sslmode=disable" up
+	migrate -path migrations -database "postgres://nextd:nextd@localhost:5436/nextd?sslmode=disable" up
 
 migrate-down: ## Run database migrations down
-	migrate -path migrations -database "postgres://nextd:nextd@localhost:5432/nextd?sslmode=disable" down
+	migrate -path migrations -database "postgres://nextd:nextd@localhost:5436/nextd?sslmode=disable" down
 
 migrate-create: ## Create new migration (usage: make migrate-create name=create_users_table)
 	migrate create -ext sql -dir migrations -seq $(name)
