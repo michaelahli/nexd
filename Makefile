@@ -27,7 +27,7 @@ docker-down: ## Stop Docker Compose
 	docker compose down
 
 migrate-up: ## Run database migrations up
-	migrate -path migrations -database "postgres://nextd:nextd@localhost:5436/nextd?sslmode=disable" up
+	DB_HOST=localhost DB_PORT=5436 go run ./cmd/nextd migrate
 
 migrate-down: ## Run database migrations down
 	migrate -path migrations -database "postgres://nextd:nextd@localhost:5436/nextd?sslmode=disable" down
