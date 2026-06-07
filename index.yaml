@@ -1,0 +1,21 @@
+apiVersion: v1
+entries:
+  nextd:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2026-06-07T13:27:01.299631292Z"
+    description: Enterprise Knowledge Intelligence Platform
+    digest: 28095d4ddd1f2812fcfd79009f4b5fe5b1155327d76f63e7d1e8fffffca63c14
+    keywords:
+    - search
+    - rag
+    - knowledge
+    - ai
+    maintainers:
+    - name: nextd
+    name: nextd
+    type: application
+    urls:
+    - https://michaelahli.github.io/nexd/nextd-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-06-07T13:27:01.298159897Z"
