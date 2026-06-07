@@ -16,7 +16,7 @@ concurrency:
 
 env:
   CHART_PATH: charts/nextd
-  CHART_DIST: .cr-release-packages
+  CHART_DIST: chart-packages
   PAGES_BRANCH: gh-pages
 
 jobs:
@@ -56,6 +56,12 @@ jobs:
         run: |
           mkdir -p "${CHART_DIST}"
           helm package "${CHART_PATH}" --destination "${CHART_DIST}"
+
+      - name: Verify packaged chart
+        shell: bash
+        run: |
+          find "${CHART_DIST}" -maxdepth 1 -name '*.tgz' -type f -print -quit | grep -q .
+          ls -la "${CHART_DIST}"
 
       - name: Upload packaged chart
         uses: actions/upload-artifact@v4
