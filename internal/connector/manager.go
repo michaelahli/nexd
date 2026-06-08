@@ -185,6 +185,24 @@ func (m *Manager) SyncNow(ctx context.Context, connectorID uuid.UUID, full bool)
 	return m.sync(ctx, running, full)
 }
 
+// Running returns a currently running connector instance.
+func (m *Manager) Running(connectorID uuid.UUID) (Connector, bool) {
+	running, ok := m.get(connectorID)
+	if !ok {
+		return nil, false
+	}
+	return running.connector, true
+}
+
+// Config returns the last known connector config.
+func (m *Manager) Config(connectorID uuid.UUID) (Config, bool) {
+	running, ok := m.get(connectorID)
+	if !ok {
+		return Config{}, false
+	}
+	return running.config, true
+}
+
 func (m *Manager) syncLoop(ctx context.Context, running *runningConnector) {
 	defer close(running.done)
 
