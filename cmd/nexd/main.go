@@ -125,6 +125,8 @@ func runServer(cfg *config.Config) {
 			AdminUsers: database.Users(),
 			Connectors: database.Connectors(),
 			AIConfig:   database.AIConfig(),
+			SyncJobs:   database.SyncJobs(),
+			ConnMgr:    connectorManager,
 			Search:     searchService,
 			Chat:       chatService,
 		}),

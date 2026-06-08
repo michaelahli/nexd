@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/michaelahli/nexd/internal/auth"
 	"github.com/michaelahli/nexd/internal/config"
+	"github.com/michaelahli/nexd/internal/connector"
 	"github.com/michaelahli/nexd/internal/http/handler"
 	adminhandler "github.com/michaelahli/nexd/internal/http/handler/admin"
 	"github.com/michaelahli/nexd/internal/http/middleware"
@@ -31,6 +32,8 @@ type Options struct {
 	AdminUsers *repository.UsersRepository
 	Connectors *repository.ConnectorRepository
 	AIConfig   *repository.AIConfigRepository
+	SyncJobs   *repository.SyncJobRepository
+	ConnMgr    *connector.Manager
 	Search     searchService
 	Chat       chatService
 }
@@ -83,10 +86,12 @@ func NewRouter(cfg *config.Config, opts Options) http.Handler {
 					r.Delete("/users", usersHandler.Delete)
 				}
 				if opts.Connectors != nil {
-					connectorsHandler := adminhandler.NewConnectors(opts.Connectors)
+					connectorsHandler := adminhandler.NewConnectors(opts.Connectors, opts.SyncJobs, opts.ConnMgr)
 					r.Get("/connectors", connectorsHandler.List)
 					r.Post("/connectors", connectorsHandler.Save)
 					r.Delete("/connectors", connectorsHandler.Delete)
+					r.Post("/connectors/test", connectorsHandler.Test)
+					r.Post("/connectors/sync", connectorsHandler.TriggerSync)
 				}
 				if opts.AIConfig != nil {
 					aiConfigHandler := adminhandler.NewAIConfig(opts.AIConfig)
