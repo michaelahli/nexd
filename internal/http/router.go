@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"net/http"
 	"os"
 
@@ -11,7 +12,17 @@ import (
 	adminhandler "github.com/michaelahli/nexd/internal/http/handler/admin"
 	"github.com/michaelahli/nexd/internal/http/middleware"
 	"github.com/michaelahli/nexd/internal/repository"
+	"github.com/michaelahli/nexd/internal/service/chat"
+	"github.com/michaelahli/nexd/internal/service/search"
 )
+
+type searchService interface {
+	Search(ctx context.Context, query search.Query) (search.Response, error)
+}
+
+type chatService interface {
+	Chat(ctx context.Context, req chat.Request) (chat.Response, error)
+}
 
 // Options contains optional router dependencies.
 type Options struct {
@@ -20,6 +31,8 @@ type Options struct {
 	AdminUsers *repository.UsersRepository
 	Connectors *repository.ConnectorRepository
 	AIConfig   *repository.AIConfigRepository
+	Search     searchService
+	Chat       chatService
 }
 
 // NewRouter builds the HTTP router for the application.
@@ -45,6 +58,20 @@ func NewRouter(cfg *config.Config, opts Options) http.Handler {
 			r.Post("/login", authHandler.Login)
 			r.Post("/refresh", authHandler.Refresh)
 		})
+
+		if opts.Search != nil || opts.Chat != nil {
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.Auth(opts.Tokens))
+				if opts.Search != nil {
+					searchHandler := handler.NewSearch(opts.Search)
+					r.Post("/search", searchHandler.Query)
+				}
+				if opts.Chat != nil {
+					chatHandler := handler.NewChat(opts.Chat)
+					r.Post("/chat", chatHandler.Complete)
+				}
+			})
+		}
 
 		if opts.AdminUsers != nil || opts.Connectors != nil || opts.AIConfig != nil {
 			r.Route("/admin", func(r chi.Router) {

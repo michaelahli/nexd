@@ -116,8 +116,6 @@ func runServer(cfg *config.Config) {
 	}
 	chatService := chat.NewService(chatClient, chat.NewSearchRetriever(searchService))
 
-	_ = chatService // TODO: wire chat service into HTTP handlers
-
 	addr := fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port)
 	server := &http.Server{
 		Addr: addr,
@@ -127,6 +125,8 @@ func runServer(cfg *config.Config) {
 			AdminUsers: database.Users(),
 			Connectors: database.Connectors(),
 			AIConfig:   database.AIConfig(),
+			Search:     searchService,
+			Chat:       chatService,
 		}),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
