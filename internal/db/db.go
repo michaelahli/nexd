@@ -92,6 +92,22 @@ func (d *DB) Search() *repository.SearchRepository {
 	return repository.NewSearchRepository(d.Pool)
 }
 
+// Users returns a repository for admin user operations.
+func (d *DB) Users() *repository.UsersRepository {
+	if d == nil {
+		return repository.NewUsersRepository(nil)
+	}
+	return repository.NewUsersRepository(d.Pool)
+}
+
+// AIConfig returns a repository for admin AI configuration operations.
+func (d *DB) AIConfig() *repository.AIConfigRepository {
+	if d == nil {
+		return repository.NewAIConfigRepository(nil)
+	}
+	return repository.NewAIConfigRepository(d.Pool)
+}
+
 // Close releases the connection pool.
 func (d *DB) Close() {
 	if d != nil && d.Pool != nil {

@@ -8,13 +8,18 @@ import (
 	"github.com/michaelahli/nexd/internal/auth"
 	"github.com/michaelahli/nexd/internal/config"
 	"github.com/michaelahli/nexd/internal/http/handler"
+	adminhandler "github.com/michaelahli/nexd/internal/http/handler/admin"
 	"github.com/michaelahli/nexd/internal/http/middleware"
+	"github.com/michaelahli/nexd/internal/repository"
 )
 
 // Options contains optional router dependencies.
 type Options struct {
-	Users  *auth.UserStore
-	Tokens *auth.TokenManager
+	Users      *auth.UserStore
+	Tokens     *auth.TokenManager
+	AdminUsers *repository.UsersRepository
+	Connectors *repository.ConnectorRepository
+	AIConfig   *repository.AIConfigRepository
 }
 
 // NewRouter builds the HTTP router for the application.
@@ -40,6 +45,29 @@ func NewRouter(cfg *config.Config, opts Options) http.Handler {
 			r.Post("/login", authHandler.Login)
 			r.Post("/refresh", authHandler.Refresh)
 		})
+
+		if opts.AdminUsers != nil || opts.Connectors != nil || opts.AIConfig != nil {
+			r.Route("/admin", func(r chi.Router) {
+				r.Use(middleware.Auth(opts.Tokens))
+				if opts.AdminUsers != nil {
+					usersHandler := adminhandler.NewUsers(opts.AdminUsers)
+					r.Get("/users", usersHandler.List)
+					r.Put("/users", usersHandler.Update)
+					r.Delete("/users", usersHandler.Delete)
+				}
+				if opts.Connectors != nil {
+					connectorsHandler := adminhandler.NewConnectors(opts.Connectors)
+					r.Get("/connectors", connectorsHandler.List)
+					r.Post("/connectors", connectorsHandler.Save)
+					r.Delete("/connectors", connectorsHandler.Delete)
+				}
+				if opts.AIConfig != nil {
+					aiConfigHandler := adminhandler.NewAIConfig(opts.AIConfig)
+					r.Get("/ai-config", aiConfigHandler.List)
+					r.Post("/ai-config", aiConfigHandler.Save)
+				}
+			})
+		}
 	}
 
 	if _, err := os.Stat("web/static"); err == nil {
