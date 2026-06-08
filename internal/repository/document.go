@@ -4,12 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/michaelahli/nexd/internal/service/embedding"
 	"github.com/michaelahli/nexd/internal/service/indexing"
 )
 
@@ -81,7 +78,7 @@ func (r *DocumentRepository) ReplaceEmbeddings(ctx context.Context, documentID u
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO document_embeddings (document_id, chunk_index, chunk_text, embedding)
 			VALUES ($1, $2, $3, $4::vector)
-		`, documentID, chunk.Index, chunk.Text, encodeVector(chunk.Vector)); err != nil {
+		`, documentID, chunk.Index, chunk.Text, EncodeVector(chunk.Vector)); err != nil {
 			return fmt.Errorf("insert document embedding: %w", err)
 		}
 	}
@@ -89,12 +86,4 @@ func (r *DocumentRepository) ReplaceEmbeddings(ctx context.Context, documentID u
 		return fmt.Errorf("commit embedding replacement: %w", err)
 	}
 	return nil
-}
-
-func encodeVector(vector embedding.Vector) string {
-	parts := make([]string, len(vector))
-	for i, value := range vector {
-		parts[i] = strconv.FormatFloat(float64(value), 'f', -1, 32)
-	}
-	return "[" + strings.Join(parts, ",") + "]"
 }

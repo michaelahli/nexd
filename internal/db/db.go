@@ -84,6 +84,14 @@ func (d *DB) SyncJobs() *repository.SyncJobRepository {
 	return repository.NewSyncJobRepository(d.Pool)
 }
 
+// Search returns a repository for vector search.
+func (d *DB) Search() *repository.SearchRepository {
+	if d == nil {
+		return repository.NewSearchRepository(nil)
+	}
+	return repository.NewSearchRepository(d.Pool)
+}
+
 // Close releases the connection pool.
 func (d *DB) Close() {
 	if d != nil && d.Pool != nil {
