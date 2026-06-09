@@ -14,6 +14,7 @@ import (
 	"github.com/michaelahli/nexd/internal/auth"
 	"github.com/michaelahli/nexd/internal/config"
 	"github.com/michaelahli/nexd/internal/connector"
+	"github.com/michaelahli/nexd/internal/connector/gdrive"
 	"github.com/michaelahli/nexd/internal/connector/lark"
 	"github.com/michaelahli/nexd/internal/connector/smb"
 	"github.com/michaelahli/nexd/internal/db"
@@ -55,6 +56,9 @@ func runServer(cfg *config.Config) {
 	}
 	if err := lark.Register(registry); err != nil {
 		log.Fatalf("register lark connector: %v", err)
+	}
+	if err := gdrive.Register(registry); err != nil {
+		log.Fatalf("register gdrive connector: %v", err)
 	}
 
 	// Start connector manager
