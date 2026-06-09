@@ -60,3 +60,20 @@ func (h *ConnectorsPage) Index(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
+
+// AIConfigPage serves the AI configuration page.
+type AIConfigPage struct {
+	templates *template.Template
+}
+
+// NewAIConfigPage creates an AI config page handler.
+func NewAIConfigPage(templates *template.Template) *AIConfigPage {
+	return &AIConfigPage{templates: templates}
+}
+
+// Index renders the AI configuration page.
+func (h *AIConfigPage) Index(w http.ResponseWriter, r *http.Request) {
+	if err := h.templates.ExecuteTemplate(w, "admin_ai_config.html", nil); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
