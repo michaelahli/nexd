@@ -164,7 +164,8 @@ func (q *fakeQueue) Fail(ctx context.Context, jobID uuid.UUID, jobErr error) err
 
 func TestServiceCompletesJobs(t *testing.T) {
 	jobID := uuid.New()
-	queue := &fakeQueue{jobs: []Job{{ID: jobID, ConnectorID: uuid.New()}}, onComplete: make(chan struct{})}
+	completeCh := make(chan struct{})
+	queue := &fakeQueue{jobs: []Job{{ID: jobID, ConnectorID: uuid.New()}}, onComplete: completeCh}
 	processor := NewProcessor(ProcessorOptions{
 		Documents: &fakeDocumentRepository{documentID: uuid.New()},
 		Source:    &fakeDocumentSource{docs: []connector.Document{{SourceID: "1", Content: "hello"}}},
@@ -177,7 +178,7 @@ func TestServiceCompletesJobs(t *testing.T) {
 		t.Fatalf("start: %v", err)
 	}
 	select {
-	case <-queue.onComplete:
+	case <-completeCh:
 	case <-time.After(time.Second):
 		t.Fatal("timed out waiting for job completion")
 	}
