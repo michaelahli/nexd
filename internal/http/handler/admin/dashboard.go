@@ -26,3 +26,20 @@ func (h *Dashboard) Index(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
+
+// UsersPage serves the users management page.
+type UsersPage struct {
+	templates *template.Template
+}
+
+// NewUsersPage creates a users page handler.
+func NewUsersPage(templates *template.Template) *UsersPage {
+	return &UsersPage{templates: templates}
+}
+
+// Index renders the users management page.
+func (h *UsersPage) Index(w http.ResponseWriter, r *http.Request) {
+	if err := h.templates.ExecuteTemplate(w, "admin_users.html", nil); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}

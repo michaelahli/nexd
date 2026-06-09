@@ -93,6 +93,8 @@ func NewRouter(cfg *config.Config, opts Options) http.Handler {
 				if templates != nil {
 					dashboardHandler := adminhandler.NewDashboard(templates)
 					r.Get("/", dashboardHandler.Index)
+					usersPageHandler := adminhandler.NewUsersPage(templates)
+					r.Get("/users-page", usersPageHandler.Index)
 				}
 				if opts.AdminUsers != nil {
 					usersHandler := adminhandler.NewUsers(opts.AdminUsers)
