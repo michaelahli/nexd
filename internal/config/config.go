@@ -11,6 +11,7 @@ type Config struct {
 	Database  DatabaseConfig
 	JWT       JWTConfig
 	AI        AIConfig
+	Admin     AdminConfig
 	RateLimit RateLimitConfig
 	Indexing  IndexingConfig
 }
@@ -50,6 +51,11 @@ type AIConfig struct {
 	APIKey         string
 	EmbeddingModel string
 	ChatModel      string
+}
+
+// AdminConfig holds admin authorization configuration.
+type AdminConfig struct {
+	Emails []string
 }
 
 // RateLimitConfig holds rate limiting configuration
