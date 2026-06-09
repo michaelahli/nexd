@@ -47,6 +47,12 @@ func (c Config) Validate() error {
 		return errors.New("ai chat model is required")
 	}
 
+	for _, email := range c.Admin.Emails {
+		if email == "" {
+			return errors.New("admin emails must not contain empty values")
+		}
+	}
+
 	if c.RateLimit.Requests <= 0 {
 		return errors.New("rate limit requests must be positive")
 	}

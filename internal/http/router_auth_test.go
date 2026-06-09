@@ -10,7 +10,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/michaelahli/nexd/internal/auth"
+	"github.com/michaelahli/nexd/internal/config"
 	apphttp "github.com/michaelahli/nexd/internal/http"
+	"github.com/michaelahli/nexd/internal/repository"
 	"github.com/michaelahli/nexd/internal/service/chat"
 	"github.com/michaelahli/nexd/internal/service/search"
 )
@@ -50,5 +52,31 @@ func TestSearchAndChatRequireAuth(t *testing.T) {
 	router.ServeHTTP(chatRec, chatReq)
 	if chatRec.Code != http.StatusUnauthorized {
 		t.Fatalf("expected /chat unauthorized, got %d", chatRec.Code)
+	}
+}
+
+func TestAdminRequiresAdminEmail(t *testing.T) {
+	tokens := auth.NewTokenManager("test-secret", time.Hour)
+	user := auth.User{ID: uuid.New(), Email: "user@example.com"}
+	token, _, err := tokens.Generate(user)
+	if err != nil {
+		t.Fatalf("generate token: %v", err)
+	}
+
+	router := apphttp.NewRouter(&config.Config{
+		Admin:     config.AdminConfig{Emails: []string{"admin@example.com"}},
+		RateLimit: config.RateLimitConfig{Requests: 100, Window: time.Minute},
+	}, apphttp.Options{
+		Users:      &auth.UserStore{},
+		Tokens:     tokens,
+		AdminUsers: &repository.UsersRepository{},
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/admin/users", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	res := httptest.NewRecorder()
+	router.ServeHTTP(res, req)
+	if res.Code != http.StatusForbidden {
+		t.Fatalf("expected /admin/users forbidden, got %d", res.Code)
 	}
 }

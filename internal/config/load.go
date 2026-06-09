@@ -42,6 +42,9 @@ func Load() (*Config, error) {
 			EmbeddingModel: v.GetString("ai.embedding_model"),
 			ChatModel:      v.GetString("ai.chat_model"),
 		},
+		Admin: AdminConfig{
+			Emails: splitCSV(v.GetString("admin.emails")),
+		},
 		RateLimit: RateLimitConfig{
 			Requests: v.GetInt("rate_limit.requests"),
 			Window:   v.GetDuration("rate_limit.window"),
@@ -74,8 +77,24 @@ func setDefaults(v *viper.Viper) {
 	v.SetDefault("ai.host", "https://api.openai.com/v1")
 	v.SetDefault("ai.embedding_model", "text-embedding-ada-002")
 	v.SetDefault("ai.chat_model", "gpt-4")
+	v.SetDefault("admin.emails", "")
 	v.SetDefault("rate_limit.requests", 100)
 	v.SetDefault("rate_limit.window", time.Minute)
 	v.SetDefault("indexing.workers", 5)
 	v.SetDefault("indexing.batch_size", 10)
+}
+
+func splitCSV(value string) []string {
+	if strings.TrimSpace(value) == "" {
+		return nil
+	}
+	parts := strings.Split(value, ",")
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(strings.ToLower(part))
+		if part != "" {
+			result = append(result, part)
+		}
+	}
+	return result
 }

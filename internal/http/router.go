@@ -79,6 +79,9 @@ func NewRouter(cfg *config.Config, opts Options) http.Handler {
 		if opts.AdminUsers != nil || opts.Connectors != nil || opts.AIConfig != nil {
 			r.Route("/admin", func(r chi.Router) {
 				r.Use(middleware.Auth(opts.Tokens))
+				if cfg != nil {
+					r.Use(middleware.RequireAdmin(cfg.Admin.Emails))
+				}
 				if opts.AdminUsers != nil {
 					usersHandler := adminhandler.NewUsers(opts.AdminUsers)
 					r.Get("/users", usersHandler.List)
