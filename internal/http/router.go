@@ -2,6 +2,7 @@ package http
 
 import (
 	"context"
+	"html/template"
 	"net/http"
 	"os"
 
@@ -54,6 +55,13 @@ func NewRouter(cfg *config.Config, opts Options) http.Handler {
 	r.Get("/health", handler.Health)
 	r.Get("/healthz", handler.Health)
 
+	// Load templates
+	templates, err := template.ParseGlob("web/templates/*.html")
+	if err != nil {
+		// Templates are optional; if missing, admin UI won't work but API still functions
+		templates = nil
+	}
+
 	if opts.Users != nil && opts.Tokens != nil {
 		authHandler := handler.NewAuth(opts.Users, opts.Tokens)
 		r.Route("/auth", func(r chi.Router) {
@@ -81,6 +89,10 @@ func NewRouter(cfg *config.Config, opts Options) http.Handler {
 				r.Use(middleware.Auth(opts.Tokens))
 				if cfg != nil {
 					r.Use(middleware.RequireAdmin(cfg.Admin.Emails))
+				}
+				if templates != nil {
+					dashboardHandler := adminhandler.NewDashboard(templates)
+					r.Get("/", dashboardHandler.Index)
 				}
 				if opts.AdminUsers != nil {
 					usersHandler := adminhandler.NewUsers(opts.AdminUsers)
