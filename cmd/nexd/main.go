@@ -14,6 +14,7 @@ import (
 	"github.com/michaelahli/nexd/internal/auth"
 	"github.com/michaelahli/nexd/internal/config"
 	"github.com/michaelahli/nexd/internal/connector"
+	"github.com/michaelahli/nexd/internal/connector/lark"
 	"github.com/michaelahli/nexd/internal/connector/smb"
 	"github.com/michaelahli/nexd/internal/db"
 	apphttp "github.com/michaelahli/nexd/internal/http"
@@ -51,6 +52,9 @@ func runServer(cfg *config.Config) {
 	registry := connector.NewRegistry()
 	if err := smb.Register(registry); err != nil {
 		log.Fatalf("register smb connector: %v", err)
+	}
+	if err := lark.Register(registry); err != nil {
+		log.Fatalf("register lark connector: %v", err)
 	}
 
 	// Start connector manager
