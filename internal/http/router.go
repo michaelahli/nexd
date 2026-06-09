@@ -95,6 +95,8 @@ func NewRouter(cfg *config.Config, opts Options) http.Handler {
 					r.Get("/", dashboardHandler.Index)
 					usersPageHandler := adminhandler.NewUsersPage(templates)
 					r.Get("/users-page", usersPageHandler.Index)
+					connectorsPageHandler := adminhandler.NewConnectorsPage(templates)
+					r.Get("/connectors-page", connectorsPageHandler.Index)
 				}
 				if opts.AdminUsers != nil {
 					usersHandler := adminhandler.NewUsers(opts.AdminUsers)
