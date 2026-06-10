@@ -2,8 +2,8 @@ apiVersion: v2
 name: nexd
 description: Enterprise Knowledge Intelligence Platform
 type: application
-version: 0.2.0
-appVersion: "0.2.0"
+version: 0.2.3
+appVersion: "0.2.3"
 keywords:
   - search
   - rag
