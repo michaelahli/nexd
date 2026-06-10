@@ -19,6 +19,7 @@ WORKDIR /app
 RUN apk add --no-cache ca-certificates tzdata
 
 COPY --from=build /out/nexd /usr/local/bin/nexd
+COPY migrations /app/migrations
 
 EXPOSE 8080
 
