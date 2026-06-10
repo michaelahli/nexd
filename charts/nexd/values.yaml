@@ -64,6 +64,12 @@ ai:
   embeddingModel: text-embedding-ada-002
   chatModel: gpt-4
 
+admin:
+  emails: ""
+  bootstrapEmail: ""
+  bootstrapName: ""
+  bootstrapPassword: ""
+
 rateLimit:
   requests: 100
   window: 1m

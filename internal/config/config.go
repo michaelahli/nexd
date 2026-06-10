@@ -55,7 +55,10 @@ type AIConfig struct {
 
 // AdminConfig holds admin authorization configuration.
 type AdminConfig struct {
-	Emails []string
+	Emails         []string
+	BootstrapEmail string
+	BootstrapName  string
+	BootstrapPass  string
 }
 
 // RateLimitConfig holds rate limiting configuration

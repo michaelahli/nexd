@@ -20,3 +20,15 @@ data:
   RATE_LIMIT_WINDOW: {{ .Values.rateLimit.window | quote }}
   INDEXING_WORKERS: {{ .Values.indexing.workers | quote }}
   INDEXING_BATCH_SIZE: {{ .Values.indexing.batchSize | quote }}
+  {{- if .Values.admin.emails }}
+  ADMIN_EMAILS: {{ .Values.admin.emails | quote }}
+  {{- end }}
+  {{- if .Values.admin.bootstrapEmail }}
+  ADMIN_BOOTSTRAP_EMAIL: {{ .Values.admin.bootstrapEmail | quote }}
+  {{- end }}
+  {{- if .Values.admin.bootstrapName }}
+  ADMIN_BOOTSTRAP_NAME: {{ .Values.admin.bootstrapName | quote }}
+  {{- end }}
+  {{- if .Values.admin.bootstrapPassword }}
+  ADMIN_BOOTSTRAP_PASSWORD: {{ .Values.admin.bootstrapPassword | quote }}
+  {{- end }}

@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/michaelahli/nexd/internal/auth"
 	"github.com/michaelahli/nexd/internal/config"
 	"github.com/michaelahli/nexd/internal/connector"
@@ -55,6 +56,29 @@ func runServer(cfg *config.Config) {
 		log.Fatalf("migrate database: %v", err)
 	}
 	log.Println("Database migrations completed")
+
+	// Bootstrap admin user if configured
+	if cfg.Admin.BootstrapEmail != "" && cfg.Admin.BootstrapPass != "" {
+		userStore := auth.NewUserStore(database.Pool)
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		existingUser, err := userStore.FindByEmail(ctx, cfg.Admin.BootstrapEmail)
+		cancel()
+		if err != nil || existingUser.ID == uuid.Nil {
+			log.Printf("Creating bootstrap admin user: %s", cfg.Admin.BootstrapEmail)
+			name := cfg.Admin.BootstrapName
+			if name == "" {
+				name = "Admin"
+			}
+			passwordHash, err := auth.HashPassword(cfg.Admin.BootstrapPass)
+			if err != nil {
+				log.Printf("Warning: failed to hash bootstrap password: %v", err)
+			} else if _, err := userStore.CreateUser(context.Background(), cfg.Admin.BootstrapEmail, name, passwordHash); err != nil {
+				log.Printf("Warning: failed to create bootstrap admin user: %v", err)
+			} else {
+				log.Println("Bootstrap admin user created successfully")
+			}
+		}
+	}
 
 	// Register connector types
 	registry := connector.NewRegistry()

@@ -43,7 +43,10 @@ func Load() (*Config, error) {
 			ChatModel:      v.GetString("ai.chat_model"),
 		},
 		Admin: AdminConfig{
-			Emails: splitCSV(v.GetString("admin.emails")),
+			Emails:         splitCSV(v.GetString("admin.emails")),
+			BootstrapEmail: v.GetString("admin.bootstrap_email"),
+			BootstrapName:  v.GetString("admin.bootstrap_name"),
+			BootstrapPass:  v.GetString("admin.bootstrap_password"),
 		},
 		RateLimit: RateLimitConfig{
 			Requests: v.GetInt("rate_limit.requests"),
