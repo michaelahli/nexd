@@ -16,8 +16,9 @@ func TestParseConfig(t *testing.T) {
 		Name: "Lark",
 		Type: Type,
 		Settings: map[string]any{
-			"app_id":     "cli_test123",
-			"app_secret": "secret456",
+			"app_id":       "cli_test123",
+			"app_secret":   "secret456",
+			"folder_token": "fld_test_123",
 		},
 	})
 	if err != nil {
@@ -28,6 +29,9 @@ func TestParseConfig(t *testing.T) {
 	}
 	if cfg.BaseURL != "https://open.larksuite.com" {
 		t.Fatalf("unexpected base URL: %q", cfg.BaseURL)
+	}
+	if cfg.FolderToken != "fld_test_123" {
+		t.Fatalf("unexpected folder token: %q", cfg.FolderToken)
 	}
 }
 
@@ -55,6 +59,54 @@ func TestClientAuth(t *testing.T) {
 	}
 }
 
+func TestClientListDocs(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/open-apis/auth/v3/tenant_access_token/internal":
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"code":                0,
+				"msg":                 "success",
+				"tenant_access_token": "t-test-token",
+				"expire":              7200,
+			})
+		case "/open-apis/drive/v1/files":
+			if got := r.Header.Get("Authorization"); got != "Bearer t-test-token" {
+				t.Fatalf("unexpected auth header: %q", got)
+			}
+			if got := r.URL.Query().Get("folder_token"); got != "fld_test_123" {
+				t.Fatalf("unexpected folder token query: %q", got)
+			}
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"code": 0,
+				"msg":  "success",
+				"data": map[string]any{
+					"files": []map[string]any{{
+						"token":         "doc_123",
+						"name":          "Doc 123",
+						"type":          "docx",
+						"created_time":  "1700000000000",
+						"modified_time": "1700000100000",
+					}},
+				},
+			})
+		default:
+			t.Fatalf("unexpected path: %s", r.URL.Path)
+		}
+	}))
+	defer server.Close()
+
+	client := NewClient(Config{AppID: "cli_test", AppSecret: "secret", BaseURL: server.URL, FolderToken: "fld_test_123"})
+	docs, err := client.ListDocs(context.Background())
+	if err != nil {
+		t.Fatalf("list docs: %v", err)
+	}
+	if len(docs) != 1 || docs[0].Token != "doc_123" || docs[0].Title != "Doc 123" {
+		t.Fatalf("unexpected docs: %#v", docs)
+	}
+}
+
 func TestConnectorValidateAndHealth(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -72,9 +124,10 @@ func TestConnectorValidateAndHealth(t *testing.T) {
 		Name: "Lark",
 		Type: Type,
 		Settings: map[string]any{
-			"app_id":     "cli_test",
-			"app_secret": "secret",
-			"base_url":   server.URL,
+			"app_id":       "cli_test",
+			"app_secret":   "secret",
+			"base_url":     server.URL,
+			"folder_token": "fld_test_123",
 		},
 	}
 	connAny, err := New(raw)
@@ -92,13 +145,33 @@ func TestConnectorValidateAndHealth(t *testing.T) {
 
 func TestConnectorFullSync(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]any{
-			"code":                0,
-			"msg":                 "success",
-			"tenant_access_token": "t-test-token",
-			"expire":              7200,
-		})
+		switch r.URL.Path {
+		case "/open-apis/auth/v3/tenant_access_token/internal":
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"code":                0,
+				"msg":                 "success",
+				"tenant_access_token": "t-test-token",
+				"expire":              7200,
+			})
+		case "/open-apis/drive/v1/files":
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"code": 0,
+				"msg":  "success",
+				"data": map[string]any{
+					"files": []map[string]any{{
+						"token":         "doc_123",
+						"name":          "Doc 123",
+						"type":          "docx",
+						"created_time":  "1700000000000",
+						"modified_time": "1700000100000",
+					}},
+				},
+			})
+		default:
+			t.Fatalf("unexpected path: %s", r.URL.Path)
+		}
 	}))
 	defer server.Close()
 
@@ -107,9 +180,10 @@ func TestConnectorFullSync(t *testing.T) {
 		Name: "Lark",
 		Type: Type,
 		Settings: map[string]any{
-			"app_id":     "cli_test",
-			"app_secret": "secret",
-			"base_url":   server.URL,
+			"app_id":       "cli_test",
+			"app_secret":   "secret",
+			"base_url":     server.URL,
+			"folder_token": "fld_test_123",
 		},
 	}
 	connAny, err := New(raw)
@@ -123,16 +197,18 @@ func TestConnectorFullSync(t *testing.T) {
 
 	docs, errs := conn.FullSync(context.Background())
 	count := 0
-	for range docs {
+	for doc := range docs {
 		count++
+		if doc.SourceID != "doc_123" || doc.Title != "Doc 123" {
+			t.Fatalf("unexpected doc: %#v", doc)
+		}
 	}
 	for err := range errs {
 		if err != nil {
 			t.Fatalf("sync error: %v", err)
 		}
 	}
-	// Currently returns empty list because ListDocs is stubbed.
-	if count != 0 {
-		t.Fatalf("expected 0 documents from stub, got %d", count)
+	if count != 1 {
+		t.Fatalf("expected 1 document, got %d", count)
 	}
 }

@@ -11,9 +11,10 @@ const Type = "lark"
 
 // Config is the Lark connector-specific configuration.
 type Config struct {
-	AppID     string
-	AppSecret string
-	BaseURL   string
+	AppID       string
+	AppSecret   string
+	BaseURL     string
+	FolderToken string
 }
 
 // ParseConfig converts generic connector settings into Lark config.
@@ -32,10 +33,12 @@ func ParseConfig(cfg connector.Config) (Config, error) {
 	if strings.TrimSpace(baseURL) == "" {
 		baseURL = "https://open.larksuite.com"
 	}
+	folderToken, _ := cfg.Settings["folder_token"].(string)
 
 	return Config{
-		AppID:     strings.TrimSpace(appID),
-		AppSecret: strings.TrimSpace(appSecret),
-		BaseURL:   strings.TrimRight(strings.TrimSpace(baseURL), "/"),
+		AppID:       strings.TrimSpace(appID),
+		AppSecret:   strings.TrimSpace(appSecret),
+		BaseURL:     strings.TrimRight(strings.TrimSpace(baseURL), "/"),
+		FolderToken: strings.TrimSpace(folderToken),
 	}, nil
 }
