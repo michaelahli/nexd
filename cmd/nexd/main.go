@@ -49,6 +49,13 @@ func runServer(cfg *config.Config) {
 	}
 	defer database.Close()
 
+	// Auto-migrate database schema
+	log.Println("Running database migrations...")
+	if err := db.RunMigrations(cfg.Database.DSN(), "migrations"); err != nil {
+		log.Fatalf("migrate database: %v", err)
+	}
+	log.Println("Database migrations completed")
+
 	// Register connector types
 	registry := connector.NewRegistry()
 	if err := smb.Register(registry); err != nil {
