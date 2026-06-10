@@ -13,6 +13,7 @@ const Type = "gdrive"
 type Config struct {
 	ServiceAccountJSON string
 	DriveFolderID      string
+	AccessToken        string
 }
 
 // ParseConfig converts generic connector settings into Google Drive config.
@@ -23,10 +24,12 @@ func ParseConfig(cfg connector.Config) (Config, error) {
 	}
 
 	driveFolderID, _ := cfg.Settings["drive_folder_id"].(string)
+	accessToken, _ := cfg.Settings["access_token"].(string)
 	// drive_folder_id is optional; if empty, list from root
 
 	return Config{
 		ServiceAccountJSON: strings.TrimSpace(serviceAccountJSON),
 		DriveFolderID:      strings.TrimSpace(driveFolderID),
+		AccessToken:        strings.TrimSpace(accessToken),
 	}, nil
 }
